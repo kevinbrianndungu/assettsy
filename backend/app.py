@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 
@@ -80,18 +80,19 @@ def add_asset():
 @app.route('/update_asset/<int:id>', methods=['POST'])
 @login_required
 def update_asset(id):
+    data = request.get_json()
     asset = Asset.query.get_or_404(id)
-    asset.quantity = int(request.form['quantity'])
+    asset.quantity = int(data['quantity'])
     db.session.commit()
-    return redirect(url_for('dashboard'))
+    return jsonify({"success": True})
 
-@app.route('/delete_asset/<int:id>')
+@app.route('/delete_asset/<int:id>', methods=['POST'])
 @login_required
 def delete_asset(id):
     asset = Asset.query.get_or_404(id)
     db.session.delete(asset)
     db.session.commit()
-    return redirect(url_for('dashboard'))
+    return jsonify({"success": True})
 
 if __name__ == '__main__':
     with app.app_context():
