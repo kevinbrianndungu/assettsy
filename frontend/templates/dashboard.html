@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="{{ url_for('static', filename='js/scripts.js') }}" defer></script>
 </head>
 <body>
     <header>
@@ -13,7 +14,7 @@
     </header>
     <main>
         <h2>Categories</h2>
-        <form method="POST" action="/add_category">
+        <form id="add-category-form" method="POST" action="/add_category">
             <input type="text" name="name" placeholder="Add Category" required>
             <button type="submit">Add</button>
         </form>
@@ -38,23 +39,19 @@
                     <tr>
                         <td>{{ asset.name }}</td>
                         <td>
-                            <form method="POST" action="/update_asset/{{ asset.id }}" style="display:inline;">
-                                <input type="number" name="quantity" value="{{ asset.quantity }}" min="0">
-                                <button type="submit">Update</button>
-                            </form>
+                            <input type="number" class="quantity-input" value="{{ asset.quantity }}" min="0" data-id="{{ asset.id }}">
+                            <button class="update-btn" data-id="{{ asset.id }}">Update</button>
                         </td>
                         <td>{{ asset.category.name }}</td>
                         <td>
-                            <form method="POST" action="/delete_asset/{{ asset.id }}" style="display:inline;">
-                                <button type="submit">Delete</button>
-                            </form>
+                            <button class="delete-btn" data-id="{{ asset.id }}">Delete</button>
                         </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
         <h3>Add New Asset</h3>
-        <form method="POST" action="/add_asset">
+        <form id="add-asset-form" method="POST" action="/add_asset">
             <input type="text" name="name" placeholder="Asset Name" required>
             <input type="number" name="quantity" placeholder="Quantity" min="0" required>
             <select name="category_id" required>
