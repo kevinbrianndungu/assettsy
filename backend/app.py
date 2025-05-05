@@ -1,10 +1,17 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+import os
 
-app = Flask(__name__)
+# Set correct template and static folder paths
+app = Flask(
+    __name__,
+    template_folder=os.path.join('..', 'frontend', 'templates'),
+    static_folder=os.path.join('..', 'frontend', 'static')
+)
+
 app.config['SECRET_KEY'] = 'your_secret_key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../instance/database.db'
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -97,7 +104,5 @@ def delete_asset(id):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()  # Create tables if they don't exist
-    app.run(debug=True)
-if __name__ == '__main__':
     app.run(debug=True)
 
