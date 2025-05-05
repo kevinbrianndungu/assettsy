@@ -1,12 +1,10 @@
-from flask_sqlalchemy import SQLAlchemy
+from backend import db
+from flask_login import UserMixin
 
-db = SQLAlchemy()
-
-class Asset(db.Model):
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    barcode = db.Column(db.String(100), unique=True)
-    condition = db.Column(db.String(50))  # e.g., Good, Fair, Damaged
-    department = db.Column(db.String(100))
-    employee = db.Column(db.String(100))
+    name = db.Column(db.String(150))
+    email = db.Column(db.String(150), unique=True)
+    password = db.Column(db.String(200))
+
 
