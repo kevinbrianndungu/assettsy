@@ -1,17 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
-import os
 
-# Set correct template and static folder paths
-app = Flask(
-    __name__,
-    template_folder=os.path.join('..', 'frontend', 'templates'),
-    static_folder=os.path.join('..', 'frontend', 'static')
-)
-
+app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///../instance/database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -47,16 +40,37 @@ def dashboard():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
-        if user and user.password == password:  # For simplicity; use hashed passwords in production
+        if user and user.password == password:  # Simple check; use hashing in production
             login_user(user)
             return redirect(url_for('dashboard'))
         else:
             flash('Invalid credentials', 'error')
     return render_template('login.html')
+
+@app.route('/signup', methods=['GET', 'POST'])
+def signup():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if User.query.filter_by(username=username).first():
+            flash('Username already exists', 'error')
+            return redirect(url_for('signup'))
+        new_user = User(username=username, password=password)
+        db.session.add(new_user)
+        db.session.commit()
+        flash('Account created! Please log in.', 'success')
+        return redirect(url_for('login'))
+    return render_template('signup.html')
 
 @app.route('/logout')
 @login_required
@@ -103,6 +117,7 @@ def delete_asset(id):
 
 if __name__ == '__main__':
     with app.app_context():
-        db.create_all()  # Create tables if they don't exist
+        db.create_all()
     app.run(debug=True)
+
 
