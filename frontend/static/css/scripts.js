@@ -1,46 +1,26 @@
-document.addEventListener("DOMContentLoaded", () => {
-    // Update Asset
-    document.querySelectorAll(".update-btn").forEach(button => {
-        button.addEventListener("click", () => {
-            const assetId = button.dataset.id;
-            const quantityInput = document.querySelector(`.quantity-input[data-id="${assetId}"]`);
-            const quantity = quantityInput.value;
+function renderCharts(deptData, conditionData) {
+  new Chart(document.getElementById('deptChart'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(deptData),
+      datasets: [{
+        label: 'Assets by Department',
+        data: Object.values(deptData),
+        backgroundColor: '#007bff'
+      }]
+    }
+  });
 
-            fetch(`/update_asset/${assetId}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ quantity }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("Asset updated successfully!");
-                } else {
-                    alert("Failed to update asset.");
-                }
-            });
-        });
-    });
+  new Chart(document.getElementById('conditionChart'), {
+    type: 'pie',
+    data: {
+      labels: Object.keys(conditionData),
+      datasets: [{
+        label: 'Asset Condition',
+        data: Object.values(conditionData),
+        backgroundColor: ['#28a745', '#ffc107', '#dc3545']
+      }]
+    }
+  });
+}
 
-    // Delete Asset
-    document.querySelectorAll(".delete-btn").forEach(button => {
-        button.addEventListener("click", () => {
-            const assetId = button.dataset.id;
-
-            if (confirm("Are you sure you want to delete this asset?")) {
-                fetch(`/delete_asset/${assetId}`, {
-                    method: "POST",
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert("Asset deleted successfully!");
-                        location.reload();
-                    } else {
-                        alert("Failed to delete asset.");
-                    }
-                });
-            }
-        });
-    });
-});
