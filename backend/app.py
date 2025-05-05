@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from sqlalchemy import func
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key'
@@ -23,6 +24,7 @@ class Asset(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
+    condition = db.Column(db.String(100), nullable=False)  # Ensure this field exists
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     category = db.relationship('Category', backref='assets')
 
@@ -36,7 +38,27 @@ def load_user(user_id):
 def dashboard():
     assets = Asset.query.all()
     categories = Category.query.all()
-    return render_template('dashboard.html', assets=assets, categories=categories)
+
+    # Department-wise data
+    dept_data = db.session.query(Category.name.label('department'), func.count(Asset.id).label('count')) \
+        .join(Asset, Asset.category_id == Category.id) \
+        .group_by(Category.name).all()
+
+    # Condition-wise data
+    condition_data = db.session.query(Asset.condition, func.count(Asset.id).label('count')) \
+        .group_by(Asset.condition).all()
+
+    # Format data for JSON serialization
+    dept_data_json = [{'department': d.department, 'count': d.count} for d in dept_data]
+    condition_data_json = [{'condition': c.condition, 'count': c.count} for c in condition_data]
+
+    return render_template(
+        'dashboard.html',
+        assets=assets,
+        categories=categories,
+        dept_data=dept_data_json,
+        condition_data=condition_data_json
+    )
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -47,7 +69,7 @@ def login():
         username = request.form['username']
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
-        if user and user.password == password:  # Simple check; use hashing in production
+        if user and user.password == password:
             login_user(user)
             return redirect(url_for('dashboard'))
         else:
@@ -92,8 +114,9 @@ def add_category():
 def add_asset():
     name = request.form['name']
     quantity = int(request.form['quantity'])
+    condition = request.form['condition']
     category_id = int(request.form['category_id'])
-    new_asset = Asset(name=name, quantity=quantity, category_id=category_id)
+    new_asset = Asset(name=name, quantity=quantity, condition=condition, category_id=category_id)
     db.session.add(new_asset)
     db.session.commit()
     return redirect(url_for('dashboard'))
@@ -119,5 +142,6 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+
 
 
