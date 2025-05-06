@@ -5,10 +5,9 @@ db = SQLAlchemy()
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(150), nullable=False)
-    name = db.Column(db.String(150))
-    assets = db.relationship('Asset', backref='owner', lazy=True)
+    username = db.Column(db.String(100), unique=True, nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)  # <-- Added this
+    password = db.Column(db.String(100), nullable=False)
 
 class Asset(db.Model):
     id = db.Column(db.Integer, primary_key=True)
