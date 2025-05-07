@@ -35,6 +35,9 @@
         // Call the function to render charts
         renderCharts(deptData, conditionData);
     </script>
+    <script>
+         var conditionData = {{ condition_data|default({})|tojson }};
+    </script>
 
 </body>
 </html>
