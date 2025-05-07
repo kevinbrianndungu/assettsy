@@ -19,7 +19,7 @@ def dashboard():
     # Convert dept_data to a regular dict (JSON serializable)
     dept_data = dict(dept_data)
 
-return render_template('dashboard.html', items=items, dept_data=dept_data, condition_data={})
+    return render_template('dashboard.html', items=items, dept_data=dept_data, condition_data={})
 
 @views.route('/add-item', methods=['GET', 'POST'])
 @login_required
