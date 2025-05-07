@@ -13,14 +13,12 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return f'<User {self.email}>'
 
-# Example Product model
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Float, nullable=False)
     stock = db.Column(db.Integer, nullable=False)
 
-# Example Transaction model
 class Transaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
@@ -28,4 +26,10 @@ class Transaction(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     total_price = db.Column(db.Float, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Item(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    quantity = db.Column(db.Integer, default=0)
+    price = db.Column(db.Float, nullable=False)
 
