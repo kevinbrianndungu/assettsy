@@ -3,6 +3,9 @@ from flask_login import login_required, current_user
 from .models import Item
 from .extensions import db
 from collections import defaultdict
+import csv
+from io import TextIOWrapper
+from flask import request
 
 views = Blueprint('views', __name__)
 
@@ -67,3 +70,35 @@ def edit_item(item_id):
 
     return render_template('edit_item.html', item=item)
 
+@views.route('/import-csv', methods=['GET', 'POST'])
+@login_required
+def import_csv():
+    if request.method == 'POST':
+        file = request.files['file']
+        if not file or not file.filename.endswith('.csv'):
+            flash('Please upload a valid CSV file.', 'danger')
+            return redirect(url_for('views.import_csv'))
+
+        stream = TextIOWrapper(file.stream)
+        csv_reader = csv.DictReader(stream)
+
+        count = 0
+        for row in csv_reader:
+            try:
+                name = row['name']
+                quantity = int(row['quantity'])
+                price = float(row['price'])
+                department = row['department']
+
+                item = Item(name=name, quantity=quantity, price=price, department=department)
+                db.session.add(item)
+                count += 1
+            except Exception as e:
+                flash(f"Error processing row: {row} -> {e}", 'warning')
+                continue
+
+        db.session.commit()
+        flash(f'Successfully imported {count} items.', 'success')
+        return redirect(url_for('views.dashboard'))
+
+    return render_template('import_csv.html')
