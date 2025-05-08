@@ -1,4 +1,3 @@
-# backend/auth.py
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from .models import User
@@ -50,3 +49,6 @@ def logout():
     logout_user()
     return redirect(url_for('auth.login'))
 
+def root():
+    session.clear()  # Clears any persistent login data
+    return redirect(url_for('auth.login'))
