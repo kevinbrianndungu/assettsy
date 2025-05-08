@@ -1,4 +1,3 @@
-
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from .models import User
 from .extensions import db
@@ -9,6 +8,8 @@ auth = Blueprint('auth', __name__)
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    logout_user()  # Force logout every time login page is visited
+
     if request.method == 'POST':
         email = request.form.get('email')
         password = request.form.get('password')
@@ -17,7 +18,7 @@ def login():
 
         if user and check_password_hash(user.password, password):
             login_user(user)
-            return redirect(url_for('views.dashboard'))  # Update this route based on your app structure
+            return redirect(url_for('views.dashboard'))
         else:
             flash('Invalid credentials. Please try again.', 'danger')
 
@@ -49,6 +50,3 @@ def logout():
     logout_user()
     return redirect(url_for('auth.login'))
 
-def root():
-    session.clear()  # Clears any persistent login data
-    return redirect(url_for('auth.login'))
